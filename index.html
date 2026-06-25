@@ -1606,37 +1606,6 @@ function renderInsights() {
   const {currency, timeUnit} = state;
   const insights = [];
 
-function copyInsights() {
-  const r = state.results;
-  if (!r || !r.pv) return;
-  const items = document.querySelectorAll('#insightsCard .insight-item');
-  if (!items.length) return;
-  let plain = `${state.projectName || 'EVM Analysis'}\n${'─'.repeat(40)}\n\n`;
-  items.forEach(item => {
-    const title = item.querySelector('.insight-title')?.textContent || '';
-    const desc = item.querySelector('.insight-desc')?.textContent || '';
-    plain += `${title}\n${desc}\n\n`;
-  });
-
-  // Use a hidden textarea as the universal fallback — works on file://, HTTP, and HTTPS
-  const ta = document.createElement('textarea');
-  ta.value = plain;
-  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-  const ok = document.execCommand('copy');
-  document.body.removeChild(ta);
-
-  const btn = document.querySelector('#insightsCard .btn[onclick="copyInsights()"]');
-  if (ok) {
-    showToast('Insights copied');
-    if (btn) { btn.textContent = 'Copied'; btn.disabled = true; setTimeout(() => { btn.textContent = 'Copy'; btn.disabled = false; }, 2000); }
-  } else {
-    showToast('Copy failed — try Ctrl+A then Ctrl+C manually');
-  }
-}
-
   // Helper for SVGs
   const icons = {
     check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
@@ -1714,7 +1683,7 @@ function copyInsights() {
   card.innerHTML = `
     <div class="flex items-center justify-between mb-16">
       <div class="card-title" style="margin-bottom:0">Analysis</div>
-      <button class="btn btn-secondary btn-sm" onclick="copyInsights()">Copy</button>
+      <button id="copyInsightsBtn" class="btn btn-secondary btn-sm" onclick="copyInsights()">Copy</button>
     </div>` +
   insights.map(i => `
     <div class="insight-item">
@@ -1725,6 +1694,37 @@ function copyInsights() {
       </div>
     </div>
   `).join('');
+}
+
+function copyInsights() {
+  const r = state.results;
+  if (!r || !r.pv) return;
+  const items = document.querySelectorAll('#insightsCard .insight-item');
+  if (!items.length) return;
+  let plain = `${state.projectName || 'EVM Analysis'}\n${'─'.repeat(40)}\n\n`;
+  items.forEach(item => {
+    const title = item.querySelector('.insight-title')?.textContent || '';
+    const desc = item.querySelector('.insight-desc')?.textContent || '';
+    plain += `${title}\n${desc}\n\n`;
+  });
+
+  // Use a hidden textarea as the universal fallback — works on file://, HTTP, and HTTPS
+  const ta = document.createElement('textarea');
+  ta.value = plain;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  const ok = document.execCommand('copy');
+  document.body.removeChild(ta);
+
+  const btn = document.querySelector('#insightsCard .btn[onclick="copyInsights()"]');
+  if (ok) {
+    showToast('Insights copied');
+    if (btn) { btn.textContent = 'Copied'; btn.disabled = true; setTimeout(() => { btn.textContent = 'Copy'; btn.disabled = false; }, 2000); }
+  } else {
+    showToast('Copy failed — try Ctrl+A then Ctrl+C manually');
+  }
 }
 
 // Override insights rendering on view switch
